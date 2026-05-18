@@ -1,0 +1,79 @@
+================================================================================
+                    AI AGENT TUI - START HERE
+================================================================================
+
+Welcome! You have a fully functional AI Agent Terminal UI ready to use.
+
+QUICK START (Linux/Mac):
+  cd first_execution
+  ./run.sh
+
+QUICK START (Windows):
+  cd first_execution
+  source venv/bin/activate  (if needed)
+  python __main__.py
+
+FIRST RUN CHECKLIST:
+  1. Start the app with ./run.sh
+  2. Press Ctrl+M to add a model
+  3. Fill in:
+     - Name: "Gemini Flash"
+     - Provider: GEMINI
+     - Model ID: gemini-2.0-flash-lite
+     - API Key: [your Google Gemini key]
+  4. Click "Add Model"
+  5. Click "Set Active"
+  6. Return to chat and start typing!
+
+KEY FEATURES:
+  ✓ Rich terminal UI
+  ✓ Graphical model management
+  ✓ Real-time agent execution
+  ✓ File operations (read/write/list)
+  ✓ Python code execution
+  ✓ Persistent configuration
+
+KEYBOARD SHORTCUTS:
+  Ctrl+M  →  Open model config
+  Ctrl+N  →  Clear chat
+  Ctrl+Q  →  Quit
+  Enter   →  Send message
+
+NEED HELP?
+  - Read: README.md (user guide)
+  - Read: SETUP.md (installation help)
+  - Run:  python verify.py (check installation)
+
+TEST IT OUT:
+  Try these prompts:
+  • "List all files in the current directory"
+  • "Read the file lorem.txt"
+  • "What's in the pkg folder?"
+
+ISSUES?
+  - Make sure venv is activated: source venv/bin/activate
+  - Check API key is valid
+  - Run: python verify.py
+  - Read: SETUP.md
+
+SYSTEM REQUIREMENTS:
+  Python 3.10+
+  500MB disk space
+  Internet connection (for API)
+
+FILE STRUCTURE:
+  first_execution/
+  ├── config/         (Configuration management)
+  ├── agent/          (AI agent logic)
+  ├── ui/             (Terminal interface)
+  ├── functions/      (File/code operations)
+  ├── venv/           (Virtual environment)
+  ├── README.md       (Full documentation)
+  ├── SETUP.md        (Setup instructions)
+  └── run.sh          (Quick start script)
+
+HAPPY CHATTING! 🚀
+
+For more info, read: README.md
+
+================================================================================

@@ -1,0 +1,125 @@
+Screen {
+    background: #1a1b26;
+}
+
+#chat-area {
+    width: 80%;
+    height: 100%;
+}
+
+#sidebar {
+    width: 20%;
+    height: 100%;
+    background: #24283b;
+    border-right: tall #414868;
+    padding: 1 2;
+}
+
+#model-label {
+    text-style: bold;
+    margin-bottom: 1;
+}
+
+#current-model {
+    color: #7aa2f7;
+    margin-bottom: 1;
+}
+
+#divider-line {
+    height: 1;
+    margin-bottom: 1;
+    color: #414868;
+}
+
+#files-label {
+    text-style: bold;
+    margin-bottom: 1;
+    color: #e0af68;
+}
+
+#file-tree {
+    height: 1fr;
+    overflow-y: auto;
+    color: #c0caf5;
+    border: solid #414868;
+}
+
+#messages {
+    height: 90%;
+    border: solid #414868;
+    padding: 1 2;
+    overflow-y: auto;
+}
+
+#user-input {
+    height: 10%;
+    border: none;
+}
+
+.message {
+    margin: 1 0;
+    padding: 1 2;
+}
+
+.message.loading {
+    text-style: italic;
+    color: #9ece6a;
+    background: #1a1b26;
+    border-left: dashed #9ece6a;
+}
+
+.user {
+    background: #3b4261;
+    color: #c0caf5;
+    border-left: solid #7aa2f7;
+}
+
+.response {
+    background: #24283b;
+    color: #c0caf5;
+    border-left: solid #bb9af7;
+}
+
+.function {
+    background: #1a1b26;
+    color: #9ece6a;
+    border-left: solid #e0af68;
+}
+
+#config-container {
+    align: center middle;
+    width: 60%;
+    border: thick #414868;
+    background: #1a1b26;
+    padding: 2 4;
+    height: auto;
+}
+
+#title {
+    text-align: center;
+    text-style: bold;
+    margin-bottom: 2;
+}
+
+#divider {
+    text-align: center;
+    margin: 2 0;
+    color: #565f89;
+}
+
+#active-model-section, #add-model-form {
+    margin-bottom: 2;
+}
+
+Label {
+    margin-top: 1;
+}
+
+Input {
+    margin-bottom: 1;
+}
+
+Button {
+    margin-top: 1;
+    width: 100%;
+}
