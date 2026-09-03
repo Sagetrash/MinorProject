@@ -1,13 +1,13 @@
 #include <iostream>
 #include <vector>
 
-// Function to find the position where the element should be inserted
-int binarySearch(const std::vector<int>& arr, int item, int low, int high) {
+// Function to find the position where it should be inserted in sorted array
+int binarySearch(int a[], int item, int low, int high) {
     while (low <= high) {
         int mid = low + (high - low) / 2;
-        if (item == arr[mid])
+        if (item == a[mid])
             return mid + 1;
-        if (item > arr[mid])
+        if (item > a[mid])
             low = mid + 1;
         else
             high = mid - 1;
@@ -15,42 +15,41 @@ int binarySearch(const std::vector<int>& arr, int item, int low, int high) {
     return low;
 }
 
-// Function to sort the array using Binary Insertion Sort
-void binaryInsertionSort(std::vector<int>& arr) {
-    int n = arr.size();
-    for (int i = 1; i < n; ++i) {
-        int key = arr[i];
+// Function to sort array using Binary Insertion Sort
+void binaryInsertionSort(int a[], int n) {
+    for (int i = 1; i < n; i++) {
+        int selected = a[i];
         int j = i - 1;
 
-        // Find the location of the element to be inserted
-        int pos = binarySearch(arr, key, 0, j);
+        // Find location to insert using binary search
+        int loc = binarySearch(a, selected, 0, j);
 
-        // Move all elements after the position to the right
-        while (j >= pos) {
-            arr[j + 1] = arr[j];
+        // Move all elements after location to create space
+        while (j >= loc) {
+            a[j + 1] = a[j];
             j--;
         }
-        arr[pos] = key;
+        a[loc] = selected;
     }
 }
 
-void printArray(const std::vector<int>& arr) {
-    for (int i : arr) {
-        std::cout << i << " ";
-    }
+void printArray(int a[], int n) {
+    for (int i = 0; i < n; i++)
+        std::cout << a[i] << " ";
     std::cout << std::endl;
 }
 
 int main() {
-    std::vector<int> arr = {37, 23, 0, 17, 12, 72, 31, 46, 100, 88, 54};
-    
-    std::cout << "Original array: ";
-    printArray(arr);
+    int arr[] = {37, 23, 0, 17, 12, 72, 31, 46, 100, 88, 54};
+    int n = sizeof(arr) / sizeof(arr[0]);
 
-    binaryInsertionSort(arr);
+    std::cout << "Original array: ";
+    printArray(arr, n);
+
+    binaryInsertionSort(arr, n);
 
     std::cout << "Sorted array: ";
-    printArray(arr);
+    printArray(arr, n);
 
     return 0;
 }

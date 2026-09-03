@@ -1,19 +1,24 @@
-from textual.screen import Screen
-from textual.containers import Horizontal, Vertical, Container
-from textual.widgets import Header, Footer, Input, Static, Tree
-from textual.widget import Widget
+from pathlib import Path
+
+from textual.app import App
+from textual.containers import Container, Horizontal, Vertical
 from textual.reactive import reactive
+from textual.screen import Screen
+from textual.widget import Widget
+from textual.widgets import Footer, Header, Input, Static, Tree
+
 from agent.core import AgentEngine, AgentStep
 from config.models import ModelRegistry
 from config.storage import load_config
-from textual.app import App
-from pathlib import Path
-from ui.file_tree import scan_directory, TreeRefreshManager
+from ui.file_tree import TreeRefreshManager, scan_directory
+
 
 class MessageContainer(Widget):
     """Container for messages that scrolls"""
+
     def render(self):
         return ""
+
 
 class Message(Static):
     def __init__(self, role: str, text: str, metadata: dict = None):
@@ -25,12 +30,19 @@ class Message(Static):
         self.update_content()
 
     def update_content(self):
-        prefix = "👤 User: " if self.role == "user" else "🤖 Agent: " if self.role == "response" else "⚙️ Tool: "
+        prefix = (
+            "👤 User: "
+            if self.role == "user"
+            else "🤖 Agent: "
+            if self.role == "response"
+            else "⚙️ Tool: "
+        )
         content = f"{prefix}{self.text}"
         if self.metadata and self.role == "function":
             args = self.metadata.get("args", "")
             content = f"{prefix}{self.text}\n   Args: {args}"
         self.update(content)
+
 
 class ChatScreen(Screen):
     def compose(self):
@@ -44,7 +56,9 @@ class ChatScreen(Screen):
                 yield Tree("Loading...", id="file-tree")
             with Vertical(id="chat-area"):
                 with Vertical(id="messages"):
-                    yield Static("Welcome to AI Agent TUI! Type your prompt below.", id="welcome")
+                    yield Static(
+                        "Welcome to CODEPLEX TUI! Type your prompt below.", id="welcome"
+                    )
                 yield Input(placeholder="Enter your prompt here...", id="user-input")
         yield Footer()
 
@@ -53,35 +67,37 @@ class ChatScreen(Screen):
         self.engine = AgentEngine(self.registry)
         config = load_config()
         self.config = config if config else ModelRegistry().get_config()
-        
+
         # Get the working directory from config
         project_root = Path(__file__).parent.parent.parent
         self.working_dir = project_root / self.config.working_directory
-        
+
         self.update_model_display()
         self.build_file_tree()
         self.start_file_watcher()
-    
+
     def start_file_watcher(self) -> None:
         """Start watching for file system changes."""
         try:
-            self.tree_refresh_manager = TreeRefreshManager(self.working_dir, self.refresh_file_tree)
+            self.tree_refresh_manager = TreeRefreshManager(
+                self.working_dir, self.refresh_file_tree
+            )
             self.tree_refresh_manager.start()
         except Exception:
             pass  # Silently fail if watchdog isn't available
-    
+
     async def refresh_file_tree(self) -> None:
         """Refresh the file tree when files change."""
         try:
             # Clear the tree
             tree = self.query_one("#file-tree", Tree)
             tree.root.children.clear()
-            
+
             # Rebuild it from the working directory
             self._add_tree_items(tree.root, self.working_dir)
         except Exception:
             pass  # Silently fail if tree refresh fails
-    
+
     def build_file_tree(self) -> None:
         """Build the file tree from the working directory."""
         try:
@@ -89,20 +105,20 @@ class ChatScreen(Screen):
             # Update the root label to show the working directory
             working_dir_name = self.working_dir.name or str(self.working_dir)
             tree.root.label = working_dir_name
-            
+
             # Recursively add items to tree
             self._add_tree_items(tree.root, self.working_dir)
         except Exception as e:
             pass  # Silently fail if tree building fails
-    
+
     def _add_tree_items(self, parent_node, directory: Path) -> None:
         """Recursively add directory items to the tree."""
         items = scan_directory(directory, relative_to=directory)
-        
+
         for display_name, path_str, is_dir, entry_path in items:
             node = parent_node.add(display_name, expand=False)
             node.data = path_str  # Store the relative path
-            
+
             # If it's a directory, recursively add children
             if is_dir:
                 try:
@@ -122,52 +138,68 @@ class ChatScreen(Screen):
 
         input_widget = self.query_one("#user-input", Input)
         input_widget.value = ""
-        
+
         # Add user message to display
         self.add_message("user", user_input)
         # Scroll to bottom after user message
         self.scroll_to_bottom()
-        
+
         # Show loading indicator
         thinking_msg = Message("response", "Thinking...", {"loading": True})
         self.loading_widget = self.query_one("#messages", Vertical).mount(thinking_msg)
         self.scroll_to_bottom()
-        
+
         # Run agent engine
         first_response = True
         try:
             async for step in self.engine.run(user_input):
                 if step.step_type == "user":
-                    continue # Already added
-                
+                    continue  # Already added
+
                 # Remove loading indicator on first response
                 if first_response:
-                    if hasattr(self, 'loading_widget'):
+                    if hasattr(self, "loading_widget"):
                         # Remove the loading widget by finding and removing it
                         messages_container = self.query_one("#messages", Vertical)
                         # Find and remove the loading widget
                         for widget in messages_container.children:
-                            if hasattr(widget, 'role') and widget.role == "response" and hasattr(widget, 'metadata') and widget.metadata and widget.metadata.get("loading"):
+                            if (
+                                hasattr(widget, "role")
+                                and widget.role == "response"
+                                and hasattr(widget, "metadata")
+                                and widget.metadata
+                                and widget.metadata.get("loading")
+                            ):
                                 widget.remove()
                                 break
                         del self.loading_widget
                     first_response = False
-                
+
                 self.add_message(step.step_type, step.content, step.metadata)
-                
+
                 # Refresh file tree if a write operation was performed
-                if step.step_type == "function" and step.metadata and step.metadata.get("function") == "writeToFile":
+                if (
+                    step.step_type == "function"
+                    and step.metadata
+                    and step.metadata.get("function") == "writeToFile"
+                ):
                     await self.refresh_file_tree()
-                
+
                 # Auto-scroll to bottom
                 self.scroll_to_bottom()
         except Exception as e:
             # Remove loading indicator if present
-            if hasattr(self, 'loading_widget'):
+            if hasattr(self, "loading_widget"):
                 messages_container = self.query_one("#messages", Vertical)
                 # Find and remove the loading widget
                 for widget in messages_container.children:
-                    if hasattr(widget, 'role') and widget.role == "response" and hasattr(widget, 'metadata') and widget.metadata and widget.metadata.get("loading"):
+                    if (
+                        hasattr(widget, "role")
+                        and widget.role == "response"
+                        and hasattr(widget, "metadata")
+                        and widget.metadata
+                        and widget.metadata.get("loading")
+                    ):
                         widget.remove()
                         break
                 del self.loading_widget
@@ -177,11 +209,11 @@ class ChatScreen(Screen):
     def add_message(self, role: str, text: str, metadata: dict = None):
         msg = Message(role, text, metadata)
         self.query_one("#messages", Vertical).mount(msg)
-    
+
     def scroll_to_bottom(self):
         # Simple approach: refresh the UI which should scroll to new content
         self.call_later(self._scroll_to_bottom)
-    
+
     def _scroll_to_bottom(self):
         try:
             messages = self.query_one("#messages", Vertical)
@@ -203,7 +235,7 @@ class ChatScreen(Screen):
         # Handle model updates if needed
         if command == "update_model":
             self.update_model_display()
-    
+
     def on_tree_select(self, event: Tree.Selected) -> None:
         """Handle file selection in the tree - insert path into chat input."""
         node = event.node
@@ -212,20 +244,20 @@ class ChatScreen(Screen):
             # Check if it's a file (not a directory)
             input_widget = self.query_one("#user-input", Input)
             current_text = input_widget.value.strip()
-            
+
             # Append path to input
             if current_text:
                 input_widget.value = current_text + f" {file_path}"
             else:
                 input_widget.value = file_path
-            
+
             # Focus the input for convenience
             input_widget.focus()
-    
+
     def on_unmount(self) -> None:
         """Clean up file watcher when screen is removed."""
         try:
-            if hasattr(self, 'tree_refresh_manager'):
+            if hasattr(self, "tree_refresh_manager"):
                 self.tree_refresh_manager.stop()
         except Exception:
             pass
